@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "*.m": "matlab",
+        "*.json": "json",
+        "*.dts.tmp": "dts",
+        "xlocmes": "cpp",
+        "*.tcc": "cpp",
+        "fstream": "cpp",
+        "new": "cpp",
+        "qtreewidgetitem": "cpp",
+        "qsqltablemodel": "cpp",
+        "qmessagebox": "cpp",
+        "typeinfo": "cpp"
+    }
+}

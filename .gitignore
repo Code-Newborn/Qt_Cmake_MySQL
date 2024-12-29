@@ -1,12 +1,26 @@
-# Created by https://www.toptal.com/developers/gitignore/api/qt
-# Edit at https://www.toptal.com/developers/gitignore?templates=qt
+# VScode
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
 
-### Qt ###
+build/
+Debug/
+Release/
+*.exe
+
 # C++ objects and libs
 *.slo
 *.lo
 *.o
-*.a
+# *.a
 *.la
 *.lai
 *.so
@@ -56,5 +70,3 @@ compile_commands.json
 *creator.user*
 
 *_qmlcache.qrc
-
-# End of https://www.toptal.com/developers/gitignore/api/qt

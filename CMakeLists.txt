@@ -26,6 +26,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
+add_subdirectory(QXlsx)  #添加
+
 if(ANDROID)
   add_library(Qt_Cmake_MySQL SHARED
     main.cpp
@@ -43,9 +45,9 @@ else()
 endif()
 
 
-find_package(Qt5 COMPONENTS Widgets Sql REQUIRED)  # 添加 Qt 模块
+find_package(Qt5 COMPONENTS Widgets Sql AxContainer REQUIRED)  # 添加 Qt 模块
 target_link_libraries(Qt_Cmake_MySQL PRIVATE Qt5::Sql)
 # mysql版本  Ver 8.0.39 for Win64 on x86_64 (MySQL Community Server - GPL)
 # Workbench版本 Version 8.0. 38 build 4270059 CE (64 bits) Community
 
-target_link_libraries(Qt_Cmake_MySQL PRIVATE Qt5::Widgets)
+target_link_libraries(Qt_Cmake_MySQL PRIVATE Qt5::Widgets QXlsx::QXlsx Qt5::AxContainer)
