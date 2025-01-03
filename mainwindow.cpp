@@ -219,7 +219,7 @@ void MainWindow::creatNewTable( QAxObject* work_sheet, QString filename ) {
     // 按表头在MySQL中创建新表
     QString creatsql = QString( "create table %1(" ).arg( work_sheet_name );
     for ( int i = 0; i <= column_count - 1; i++ ) {
-        creatsql = creatsql + QString( "%1" ).arg( keyType[ i ] );
+        creatsql = creatsql + QString( "`%1`" ).arg( keyType[ i ] );
         if ( i < column_count - 1 ) {
             creatsql = creatsql + QString( " varchar(255)," );
         }
@@ -401,13 +401,13 @@ void MainWindow::on_pushButton_import_clicked() {
             // qDebug() << columnNames.last();
         }
 
-        QString deleteQuery_str = QString( "DELETE FROM main \n WHERE (%1 IS NULL OR %2 = '')" ).arg( columnNames.at( 0 ) ).arg( columnNames.at( 0 ) );
+        QString deleteQuery_str = QString( "DELETE FROM main \n WHERE (`%1` IS NULL OR `%2` = '')" ).arg( columnNames.at( 0 ) ).arg( columnNames.at( 0 ) );
         for ( int i = 1; i <= columnName_count - 1; i++ ) {
             if ( i < columnName_count - 1 ) {
-                deleteQuery_str = deleteQuery_str + QString( "\n AND (%1 IS NULL OR %2 = '')" ).arg( columnNames.at( i ) ).arg( columnNames.at( i ) );
+                deleteQuery_str = deleteQuery_str + QString( "\n AND (`%1` IS NULL OR `%2` = '')" ).arg( columnNames.at( i ) ).arg( columnNames.at( i ) );
             }
             else {
-                deleteQuery_str = deleteQuery_str + QString( " \n AND (%1 IS NULL OR %2 = '');" ).arg( columnNames.at( i ) ).arg( columnNames.at( i ) );
+                deleteQuery_str = deleteQuery_str + QString( " \n AND (`%1` IS NULL OR `%2` = '');" ).arg( columnNames.at( i ) ).arg( columnNames.at( i ) );
             }
         }
         if ( !query.exec( deleteQuery_str ) )  // 删除空白行
