@@ -10,6 +10,8 @@
         "qtreewidgetitem": "cpp",
         "qsqltablemodel": "cpp",
         "qmessagebox": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "string_view": "cpp",
+        "xutility": "cpp"
     }
 }

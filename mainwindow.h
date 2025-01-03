@@ -34,8 +34,8 @@ private slots:
     void fatherNodeClicked( QTreeWidgetItem* item, QString filtername );
     void childrenNodeClicked( QTreeWidgetItem* item, QString filtername );
 
-    void creatNewTable( QAxObject* work_sheet );
-    void InsertData( QAxObject* work_sheet );
+    void creatNewTable( QAxObject* work_sheet, QString filename );
+    void InsertData( QAxObject* work_sheet, QString filename );
     bool isTableExists( QString& table );
 
     void on_pushButton_import_clicked();

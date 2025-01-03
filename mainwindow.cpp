@@ -3,6 +3,7 @@
 
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlDriver>
+#include <QSqlField>
 #include <QtDebug>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -19,6 +20,7 @@
 
 #include <QStandardItemModel>  //实现通用的二维数据的管理功能。
 #include <QSqlTableModel>
+#include <QSqlRecord>
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -30,23 +32,6 @@ bool        parentNodeSelected = false;
 
 MainWindow::MainWindow( QWidget* parent ) : QMainWindow( parent ), ui( new Ui::MainWindow ) {
     ui->setupUi( this );
-
-    // QString strFilePathName = QFileDialog::getOpenFileName( this, QStringLiteral( "选择Excel文件" ), "", tr( "Exel file(*.xls *.xlsx)" ) );
-    // if ( strFilePathName.isNull() ) {
-    //     return;
-    // }
-    // QAxObject* excel = new QAxObject( this );
-
-    //     if ( excel->setControl( "Excel.Application" ) ) {  // 加载 Microsoft Excel 控件
-    // }
-    // else {
-    //     excel->setControl( "ket.Application" );  // 加载 WPS Excel 控件
-    // }
-
-    // excel->setProperty( "Visible", false );                             // 不显示 Excel 窗体
-    // QAxObject* workBooks = excel->querySubObject( "WorkBooks" );        // 获取工作簿集合
-    // workBooks->dynamicCall( "Open(const QString&)", strFilePathName );  // 打开打开已存在的工作簿
-    // QAxObject* workBook = excel->querySubObject( "ActiveWorkBook" );    // 获取当前工作簿
 
     initTableview();  // 初始化默认状态
     ui->treeWidget->setHeaderLabel( "表格名" );
@@ -72,114 +57,6 @@ MainWindow::MainWindow( QWidget* parent ) : QMainWindow( parent ), ui( new Ui::M
     mymodel->setEditStrategy( QSqlTableModel::OnManualSubmit );
     mymodel->select();
     model = new QStandardItemModel();  // QStandardItemModel 是包含单元格的容器（在这里可以看作表）
-
-    /*
-        // 第一步：定义xlsw
-        QXlsx::Document xlsxR( "立创商城购物车详情.xlsx" );
-
-        // 第二布：加载
-        if ( xlsxR.load() )  // load excel file
-        {
-            xlsxR.selectSheet( xlsxR.sheetNames()[ 0 ] );
-            QXlsx::CellRange range = xlsxR.dimension();
-
-            // 第三步：遍历，获取数据
-            for ( int i = 1; i <= range.columnCount(); i++ ) {
-                for ( int j = 1; j <= range.rowCount(); ++j ) {
-                    if ( xlsxR.cellAt( j, i ) ) {
-                        // 遍历行和列，拿到数据 ：xlsxR.cellAt(i,j)->value().toInt()
-                        // QString str = QString("\\xE8\\xB4\\xAD\\xE4\\xB9\\xB0\\xE7\\xB1\\xBB\\xE5\\x9E\x8B");
-                        // QByteArray bytes = str.toLatin1();
-                        // qDebug() << bytes;
-                        qDebug() << QString::fromUtf8( ( xlsxR.cellAt( j, i )->value().toByteArray() ) );
-                    }
-                }
-            }
-        }
-        else {
-            qDebug() << "打开文件失败";
-        }
-
-        // 输出可用数据库驱动
-        qDebug() << "available drivers:";
-        QStringList drivers = QSqlDatabase::drivers();
-        foreach( QString driver, drivers )
-            qDebug() << driver;
-
-        // 删除已存在的表
-        QString filePath = "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/t.csv";
-        QFile   file( filePath );
-        if ( file.exists() ) {
-            file.remove();
-        }
-
-
-        QSqlQuery query;
-
-        // 删表语句
-        bool success = query.exec( "DROP TABLE IF EXISTS city" );
-        if ( !success ) {
-            qDebug() << "Error deleting table:" << query.lastError();
-        }
-        else {
-            qDebug() << "Table deleted successfully";
-        }
-
-
-        // 建表语句
-        QString createTableSql = "CREATE TABLE IF NOT EXISTS city ("
-                                 "Name VARCHAR(255) NOT NULL PRIMARY KEY, "
-                                 "CountryCode VARCHAR(255) NOT NULL, "
-                                 "District VARCHAR(255) NOT NULL UNIQUE, "
-                                 "Population INT NOT NULL)";
-        if ( !query.exec( createTableSql ) ) {
-            qDebug() << "Error: 创建表失败," << query.lastError().text();
-        }
-        else {
-            qDebug() << "创建表成功";
-        }
-
-        dbMYSQL.exec( "SET NAMES 'UTF8'" );  // 防止插入的中文数据为乱码
-
-        // 插入语句
-        QString sqlStr = "insert into city(Name,CountryCode,District,Population)values(:Name,:CountryCode,:District,:Population);";
-        query.prepare( sqlStr );
-        query.bindValue( ":Name", "广东" );
-        query.bindValue( ":CountryCode", "GUA" );
-        query.bindValue( ":District", "广州" );
-        query.bindValue( ":Population", 123301 );
-        if ( query.exec() ) {
-            qDebug() << "insert success!";
-        }
-        else {
-            qDebug() << "insert failed:" << query.lastError().text();
-        }
-
-        // 保证C:\ProgramData\MySQL\MySQL Server XX.XX\my.ini文件里的secure-file-priv字段所设置文件夹路径为允许导出路径
-        if ( query.exec( "SELECT * FROM mydatabase.city INTO OUTFILE 'G:/Github/Qt_Cmake_MySQL/output/t.csv';" ) ) {
-            qDebug() << "导出成功：";
-        }
-        else {
-            qDebug() << "导出失败：" << query.lastError();
-        }
-
-
-        // 执行查询
-        if ( query.exec( "SELECT * FROM mydatabase.city" ) ) {  // 替换为你的SQL查询
-            // 遍历查询结果
-            while ( query.next() ) {
-                QString field1 = query.value( 0 ).toString();  // 假设第一个字段是字符串类型
-                int     field2 = query.value( 3 ).toInt();     // 假设第二个字段是整型
-                qDebug() << field1 << field2;
-            }
-        }
-        else {
-            qDebug() << "查询失败：" << query.lastError();
-        }
-
-        // 关闭数据库连接
-        dbMYSQL.close();
-        */
 }
 
 void MainWindow::initTableview() {
@@ -310,7 +187,7 @@ bool MainWindow::isTableExists( QString& table ) {
     query.exec( sql );
     while ( query.next() ) {
         QString biaoming = query.value( 0 ).toString().trimmed();
-        qDebug() << "数据库中已存在：" << biaoming;
+        // qDebug() << "数据库中已存在：" << biaoming;
         if ( QString::compare( biaoming, table, Qt::CaseInsensitive ) )
             ;
         else  // 存在
@@ -321,33 +198,36 @@ bool MainWindow::isTableExists( QString& table ) {
 
 
 // 在mysql中创建新表格
-void MainWindow::creatNewTable( QAxObject* work_sheet ) {
-    // 获取表头
-    QString    work_sheet_name = work_sheet->property( "Name" ).toString();  // 获取工作表名称
+void MainWindow::creatNewTable( QAxObject* work_sheet, QString filename ) {
+    // 获取工作表一些属性
+    // QString    work_sheet_name = work_sheet->property( "Name" ).toString();  // 获取工作表名称
+    QString    work_sheet_name = filename;
     QAxObject* used_range      = work_sheet->querySubObject( "UsedRange" );  // 选取当前页面所有已使用单元格
     QAxObject* columns         = used_range->querySubObject( "Columns" );
     int        column_start    = used_range->property( "Column" ).toInt();  // 获取起始列
     int        column_count    = columns->property( "Count" ).toInt();      // 获取列数
     QString    keyType[ column_count ];                                     // 表头数列
 
-    for ( int i = column_start; i < column_count + column_start; i++ )  // 获取表头
-    {
+    // 获取表头内容
+    for ( int i = column_start; i < column_count + column_start; i++ ) {
         QAxObject* cell             = work_sheet->querySubObject( "Cells(int,int)", 1, i );
         QString    value            = cell->dynamicCall( "Value2()" ).toString();
         keyType[ i - column_start ] = value;
-        qDebug() << i - column_start << ":" << keyType[ i - column_start ];
+        // qDebug() << i - column_start << ":" << keyType[ i - column_start ];  // 打印表头
     }
-    QString creatsql = QString( "create table %1(" ).arg( work_sheet_name );  // 按表头在MySQL中创建新表
+
+    // 按表头在MySQL中创建新表
+    QString creatsql = QString( "create table %1(" ).arg( work_sheet_name );
     for ( int i = 0; i <= column_count - 1; i++ ) {
         creatsql = creatsql + QString( "%1" ).arg( keyType[ i ] );
         if ( i < column_count - 1 ) {
-            creatsql = creatsql + QString( " varchar(20)," );
+            creatsql = creatsql + QString( " varchar(255)," );
         }
         else {
-            creatsql = creatsql + QString( " varchar(20));" );
+            creatsql = creatsql + QString( " varchar(255));" );
         }
     }
-    qDebug() << creatsql;
+    // qDebug() << creatsql;  // 打印创建表MySQL命令
     QSqlQuery creatquery( dbMYSQL );
     if ( creatquery.exec( creatsql ) )
         qDebug() << "成功创建表格：" << work_sheet_name;
@@ -358,8 +238,9 @@ void MainWindow::creatNewTable( QAxObject* work_sheet ) {
 
 
 // 在表格中插入数据
-void MainWindow::InsertData( QAxObject* work_sheet ) {
-    QString    work_sheet_name = work_sheet->property( "Name" ).toString();  // 获取工作表名称
+void MainWindow::InsertData( QAxObject* work_sheet, QString filename ) {
+    // QString    work_sheet_name = work_sheet->property( "Name" ).toString();  // 获取工作表名称
+    QString    work_sheet_name = filename;
     QAxObject* used_range      = work_sheet->querySubObject( "UsedRange" );  // 选取当前页面所有已使用单元格
     QAxObject* rows            = used_range->querySubObject( "Rows" );
     QAxObject* columns         = used_range->querySubObject( "Columns" );
@@ -367,7 +248,7 @@ void MainWindow::InsertData( QAxObject* work_sheet ) {
     int        column_start    = used_range->property( "Column" ).toInt();  // 获取起始列
     int        row_count       = rows->property( "Count" ).toInt();         // 获取行数
     int        column_count    = columns->property( "Count" ).toInt();      // 获取列数
-    qDebug() << "column_count:" << column_count;
+    // qDebug() << "row_count:" << row_count;
 
     QSqlQuery insertquery( dbMYSQL );
     for ( int i = row_start; i < row_count + row_start; i++ )  // 从行开始
@@ -384,9 +265,11 @@ void MainWindow::InsertData( QAxObject* work_sheet ) {
                 strSql = strSql + QString( ")" );
             }
         }
-        qDebug() << strSql;
-        // 调用写数据函数,将一行数据插入数据库
-        insertquery.exec( strSql );
+        // qDebug() << strSql;
+        if ( !insertquery.exec( strSql ) )
+            qWarning() << "Failed to insert empty rows:" << insertquery.lastError().text();
+        // else
+        //     qDebug() << "insert successfully.";
     }
 
     // 验证是否缺少行,不缺少则数据导入成功
@@ -403,57 +286,174 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
+
 void MainWindow::on_pushButton_import_clicked() {
     QString filePath = QFileDialog::getOpenFileName( this, tr( "Open Excel file" ), "", tr( "Excel Files (*.xlsx *.xls)" ) );  // 打开选择文件窗口
-    if ( !filePath.isEmpty() ) {
-        qDebug() << "当前打开的文件路径为" << filePath;  // 显示文件路径
+    if ( filePath.isEmpty() ) {
+        qDebug() << "未选择文件";
     }
-    QFileInfo fileInfo( filePath );
-    QString   filename = fileInfo.baseName();  // 获取工作簿（Excel文件）名称
+    else {
+        qDebug() << "当前打开的文件路径为" << filePath;  // 显示文件路径
+        QFileInfo fileInfo( filePath );
+        QString   filename = fileInfo.baseName();  // 获取工作簿（Excel文件）名称，仅含一个Sheet表
 
-    QAxObject* excel = new QAxObject( "Excel.Application" );
-    excel->setProperty( "Visible", false );                            // 不显示 Excel 窗体
-    QAxObject* work_books = excel->querySubObject( "WorkBooks" );      // 获取工作簿（Excel文件）集合
-    work_books->dynamicCall( "Open (const QString&)", filePath );      // 打开已存在的工作簿
-    QAxObject* work_book = excel->querySubObject( "ActiveWorkBook" );  // 获取当前工作簿（Excel文件）
+        QAxObject* excel = new QAxObject( "Excel.Application" );
+        excel->setProperty( "Visible", false );                            // 不显示 Excel 窗体
+        QAxObject* work_books = excel->querySubObject( "WorkBooks" );      // 获取工作簿（Excel文件）集合
+        work_books->dynamicCall( "Open (const QString&)", filePath );      // 打开已存在的工作簿
+        QAxObject* work_book = excel->querySubObject( "ActiveWorkBook" );  // 获取当前工作簿（Excel文件）
 
-    QAxObject* work_sheets = work_book->querySubObject( "Sheets" );     // Sheets也可换用WorkSheets
-    int        sheet_count = work_sheets->property( "Count" ).toInt();  // 获取工作表数目
-    qDebug() << "当前文件有" << sheet_count << "张sheet";
+        QAxObject* work_sheets = work_book->querySubObject( "Sheets" );     // Sheets也可换用WorkSheets
+        int        sheet_count = work_sheets->property( "Count" ).toInt();  // 获取工作表数目
+        qDebug() << "当前文件有" << sheet_count << "张sheet";
 
-    for ( int i = 1; i <= sheet_count; i++ )  // 循环操作每张sheet
-    {
-        QAxObject* work_sheet = work_book->querySubObject( "Sheets(int)", i );
-        // QString    work_sheet_name = work_sheet->property( "Name" ).toString();  // 获取工作表名称
-        QVariant   visible = work_sheet->dynamicCall( "Visible" );  // 导入可见工作表
-        if ( visible.toInt() == -1 )                                // -1表示该工作表是可见的
+        for ( int i = 1; i <= sheet_count; i++ )  // 循环操作每张sheet
         {
-            qDebug() << "所获取工作簿（Excel文件）名" << filename;
+            QAxObject* work_sheet = work_book->querySubObject( "Sheets(int)", i );
+            // QString    work_sheet_name = work_sheet->property( "Name" ).toString();  // 获取工作表名称
+            QVariant   visible = work_sheet->dynamicCall( "Visible" );  // 导入可见工作表
+            if ( visible.toInt() == -1 )                                // -1表示该工作表是可见的
+            {
+                qDebug() << "所获取工作簿（Excel文件）名" << filename;
 
-            // 查看数据库中是否有相应表格，没有就创建
-            if ( isTableExists( filename ) ) {
-                int ok = QMessageBox::warning( this, tr( "提示：" ),
-                                               tr( "当前数据库中已经存在该表，"
-                                                   "确认替换吗？ " ),
-                                               QMessageBox::Yes, QMessageBox::No );
-                if ( ok == QMessageBox::No )
-                    ;
-                else  // 替换
-                {
+                QString main_sheetName = QString( "main" );
+                if ( !isTableExists( main_sheetName ) ) {
+                    creatNewTable( work_sheet, QString( "main" ) );  // 若合并表不存在，则创建与打开文件拥有一样表头的Table合并表
+                }
+                else {
+                    // 丢弃'main'表,重新统计数量,创建'main'表
                     QSqlQuery query( dbMYSQL );
-                    query.exec( QString( "drop table if exists %1" ).arg( filename ) );
-                    creatNewTable( work_sheet );
-                    InsertData( work_sheet );
+                    query.exec( QString( "drop table if exists %1" ).arg( QString( "main" ) ) );
+                    qDebug() << "'main' 存在，丢弃，重新统计";
+                    creatNewTable( work_sheet, QString( "main" ) );  // 若合并表不存在，则创建与打开文件拥有一样表头的Table合并表
+                }
+
+                // 查看数据库中是否有相应表格，没有就创建
+                if ( isTableExists( filename ) ) {
+                    int ok = QMessageBox::warning( this, tr( "提示：" ),
+                                                   tr( "当前数据库中已经存在该表，"
+                                                       "确认替换吗？ " ),
+                                                   QMessageBox::Yes, QMessageBox::No );
+                    if ( ok == QMessageBox::No )
+                        ;
+                    else  // 替换
+                    {
+                        QSqlQuery query( dbMYSQL );
+                        query.exec( QString( "drop table if exists %1" ).arg( filename ) );
+                        creatNewTable( work_sheet, filename );
+                        InsertData( work_sheet, filename );
+                    }
+                }
+                else {
+                    creatNewTable( work_sheet, filename );
+                    InsertData( work_sheet, filename );
                 }
             }
+        }
+
+        // NOTE 合并所有'立创'开头的表,插入main表中
+        QSqlQuery query;  // 查询符合条件的表名，例如选择所有名称以 '立创' 开头的表
+        query.prepare( "SELECT table_name FROM information_schema.tables WHERE table_schema = :schema_name AND table_name LIKE :table_pattern" );
+        query.bindValue( ":schema_name", "mydatabase" );  // 使用目标数据库名称
+        query.bindValue( ":table_pattern", "立创%" );     // 例如选择所有名称以 '立创' 开头的表
+
+        if ( !query.exec() ) {
+            qDebug() << "Error fetching table names:" << query.lastError().text();
+        }
+
+        // 输出符合条件的所有表名
+        while ( query.next() ) {
+            QString tableName = query.value( 0 ).toString();
+            qDebug() << "Found table:" << tableName;
+
+            // 可以在此处进行后续操作，如选择数据、插入数据等
+            // 例如：查询该表的数据
+            QSqlQuery selectQuery;
+            selectQuery.prepare( QString( "INSERT INTO main SELECT * FROM %1" ).arg( tableName ) );
+            if ( selectQuery.exec() ) {
+                while ( selectQuery.next() ) {
+                    // 假设每个表有 'id', 'name' 字段
+                    QString id   = selectQuery.value( "商品编号" ).toString();
+                    QString name = selectQuery.value( "名称" ).toString();
+                    // qDebug() << "ID:" << id << ", Name:" << name;
+                }
+                qDebug() << "Data copied successfully!";
+            }
             else {
-                creatNewTable( work_sheet );
-                InsertData( work_sheet );
+                qDebug() << "Error selecting data from table:" << tableName << selectQuery.lastError().text();
             }
         }
+
+        // NOTE 删除main表中所有列都为空或空字符串的行
+        QString tableName = QString( "main" );                                               // 查询全部列名
+        QString queryStr  = QString( "SELECT * FROM %1 LIMIT 1" ).arg( QString( "main" ) );  // 查询一行即可
+        if ( !query.exec( queryStr ) ) {
+            qWarning() << "Failed to execute query:" << query.lastError().text();
+            return;
+        }
+        QSqlRecord  record           = query.record();  // 获取查询结果
+        int         columnName_count = record.count();
+        QStringList columnNames;
+        // qDebug() << "Columns in table" << tableName << ":";
+        for ( int i = 0; i < record.count(); ++i ) {
+            QString columnName = record.fieldName( i );
+            columnNames.insert( columnNames.length(), columnName );
+            // qDebug() << columnNames.last();
+        }
+
+        QString deleteQuery_str = QString( "DELETE FROM main \n WHERE (%1 IS NULL OR %2 = '')" ).arg( columnNames.at( 0 ) ).arg( columnNames.at( 0 ) );
+        for ( int i = 1; i <= columnName_count - 1; i++ ) {
+            if ( i < columnName_count - 1 ) {
+                deleteQuery_str = deleteQuery_str + QString( "\n AND (%1 IS NULL OR %2 = '')" ).arg( columnNames.at( i ) ).arg( columnNames.at( i ) );
+            }
+            else {
+                deleteQuery_str = deleteQuery_str + QString( " \n AND (%1 IS NULL OR %2 = '');" ).arg( columnNames.at( i ) ).arg( columnNames.at( i ) );
+            }
+        }
+        if ( !query.exec( deleteQuery_str ) )  // 删除空白行
+            qWarning() << "Failed to delete empty rows:" << query.lastError().text();
+        else
+            qDebug() << "Empty rows deleted successfully.";
+
+        // NOTE 丢弃'order_counts'表,重新统计数量
+        if ( !query.exec( QString( "drop table if exists %1" ).arg( QString( "order_counts" ) ) ) )  // 如果 'order_counts' 存在，丢弃
+            qWarning() << "Failed to drop table order_counts" << query.lastError().text();
+        else
+            qDebug() << "'order_counts' 存在，丢弃后重新统计";
+
+        QSqlQuery createTableQuery;
+        createTableQuery.prepare( "CREATE TABLE IF NOT EXISTS order_counts ("
+                                  "商品编号  varchar(255), "
+                                  "商品分类 varchar(255), "
+                                  "名称 varchar(255), "
+                                  "商品型号 varchar(255), "
+                                  "封装规格 varchar(255), "
+                                  "total_quantity INT, "
+                                  "PRIMARY KEY (商品编号));" );  // 创建新表 'order_counts'
+
+        if ( !createTableQuery.exec() ) {
+            qDebug() << "Error creating table 'order_counts':" << createTableQuery.lastError().text();
+        }
+        else {
+            qDebug() << "Table 'order_counts' created successfully.";
+        }
+
+        QString sumQuery_str = R"(
+            INSERT INTO order_counts (商品编号,商品分类,名称,商品型号,封装规格,total_quantity)
+            SELECT  商品编号,商品分类,名称,商品型号,封装规格, SUM(购买数量) AS total_quantity
+            FROM main
+            GROUP BY 商品编号,商品分类,名称,商品型号,封装规格;)";  // 统计相同 [ 商品编号,商品分类,名称,商品型号,封装规格 ] 的数量
+
+        if ( !query.exec( sumQuery_str ) ) {
+            qDebug() << "Error inserting data into 'order_counts':" << query.lastError().text();
+        }
+        else {
+            qDebug() << "Data inserted into 'order_counts' successfully.";
+        }
+
+        work_book->dynamicCall( "Close()" );  // 关闭工作簿
+        excel->dynamicCall( "Quit()" );       // 关闭 excel
+        delete excel;
+        excel = NULL;
     }
-    work_book->dynamicCall( "Close()" );  // 关闭工作簿
-    excel->dynamicCall( "Quit()" );       // 关闭 excel
-    delete excel;
-    excel = NULL;
 }
