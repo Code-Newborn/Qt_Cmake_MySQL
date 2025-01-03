@@ -288,7 +288,17 @@ MainWindow::~MainWindow() {
 
 
 void MainWindow::on_pushButton_import_clicked() {
-    QString filePath = QFileDialog::getOpenFileName( this, tr( "Open Excel file" ), "", tr( "Excel Files (*.xlsx *.xls)" ) );  // 打开选择文件窗口
+
+    // 假设我们想打开当前程序的路径
+    QString currentPath = QDir::currentPath();
+    QDir    dir( currentPath );               // 获取当前层级的路径（可执行文件目录）
+    dir.cdUp();                               // 将路径指向上一层级
+    dir.cdUp();                               // 将路径指向上一层级
+    QString parentPath = dir.absolutePath();  // 获取上一层级的绝对路径
+    qDebug() << parentPath;
+    parentPath += "\\data";
+
+    QString filePath = QFileDialog::getOpenFileName( this, tr( "Open Excel file" ), parentPath, tr( "Excel Files (*.xlsx *.xls)" ) );  // 打开选择文件窗口
     if ( filePath.isEmpty() ) {
         qDebug() << "未选择文件";
     }

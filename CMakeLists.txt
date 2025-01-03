@@ -24,6 +24,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #    endif()
 #endif()
 
+
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
 add_subdirectory(QXlsx)  #添加
@@ -44,6 +45,9 @@ else()
   )
 endif()
 
+# 设置项目输出目录
+set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
+
 
 find_package(Qt5 COMPONENTS Widgets Sql AxContainer REQUIRED)  # 添加 Qt 模块
 target_link_libraries(Qt_Cmake_MySQL PRIVATE Qt5::Sql)
@@ -51,3 +55,8 @@ target_link_libraries(Qt_Cmake_MySQL PRIVATE Qt5::Sql)
 # Workbench版本 Version 8.0. 38 build 4270059 CE (64 bits) Community
 
 target_link_libraries(Qt_Cmake_MySQL PRIVATE Qt5::Widgets QXlsx::QXlsx Qt5::AxContainer)
+
+# 设置项目输出目录
+set_target_properties(Qt_Cmake_MySQL PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
